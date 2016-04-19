@@ -1,5 +1,9 @@
 # 云感知应用架构
 
+翻译：**linxuhua:** (hualee215 AT gmail.com)
+
+原文：[architecting_cloud_aware_applications](https://opendatacenteralliance.org/wp-content/uploads/architecting_cloud_aware_applications.pdf)
+
 ## 应用程序架构演进历程
 应用程序体系结构跟随计算机硬件、 网络和设备从个人电脑到智能手机同步发展至今。云计算作为最新的进化力量，正在改变应用程序体系结构。要了解云计算正在怎样改变应用程序体系架构，思考在常规非云环境应用是如何架构。
 ### 多层应用架构
