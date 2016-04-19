@@ -281,7 +281,7 @@
   ![oauth](oauth.png)
 
   以下是授权设计模式里的重要几点([OAuth 2.0 specification](http://tools.ietf.org/html/rfc6749)，［Practices for Secure Development of
-  Cloud Applications］（http://www.safecode.org/publications/SAFECode_CSA_Cloud_Final1213.pdf）)
+  Cloud Applications](http://www.safecode.org/publications/SAFECode_CSA_Cloud_Final1213.pdf）)
   * 效益
     - 提高安全性
     - 提供细粒度的访问控制服务
