@@ -2,7 +2,11 @@
 
 翻译：**linxuhua:** (hualee215 AT gmail.com)
 
+[TOC]
+
 原文：[architecting_cloud_aware_applications](https://opendatacenteralliance.org/wp-content/uploads/architecting_cloud_aware_applications.pdf)
+
+
 
 ## 应用程序架构演进历程
 应用程序体系结构跟随计算机硬件、 网络和设备从个人电脑到智能手机同步发展至今。云计算作为最新的进化力量，正在改变应用程序体系结构。要了解云计算正在怎样改变应用程序体系架构，思考在常规非云环境应用是如何架构。
@@ -23,7 +27,7 @@
 对于应用程序来说，虚拟化环境几乎都是同质化的，包含应用的构造方法、配置静态数据等。由于虚拟环境可以根据需求创建和配置新的应用组件的实例，配合虚拟感知的负载技术、虚拟IP技术使扩展变得更容易，而且每层的独立扩展相对于其它层来说都是透明的。
 
 
-### 云应用架构
+## 云应用架构
 在云环境开发应用时，开发人员不一定非的改造应用的架构来适应云环境，开发人员照样可以把应用部署在云环境中，比如使用P2V方法，把物理机的应用原样迁移到虚拟机中，但是这样会妨碍应用使用云的特殊功能。比如原来的多层部署模式，耦合了依赖层的相关信息(服务信息、IP地址、web相关配置等)，这样就无法做到自动化扩展到多个虚机或私有、公共云的多个实例。如果要有效地利用云的功能，那么应用在设计架构时，就要基于云的思想和特性去考虑应用的架构，包含弹性、自助服务、多租户等等。例如下图展示的传统多层和云应用比较。
 
 ![muti vs cloud](muti-tier vs cloud.png)
@@ -448,14 +452,118 @@ Table 3. Operational strategies.
 #### API的访问控制
 API的访问控制可以确保应用和服务仅被允许的客户端访问。如前所述，没有任何保证能够使的部署在云环境的应用是安全的。一种方案是在API服务的前端加代理管理。但这不仅可以控制访问，还能够审计和统计API的使用情况。Netflix使用这种方法来控制访问其核心的共享服务。通过这种方式，Netflix可以确保只有服务的开发者能够通过服务访问层分发请求。
 
-####分阶段部署
+#### 分阶段部署
 在大型分布式系统中，由于bug、边界影响性、无法预料的不兼容性可能导致软件更新的异常情况发生。而且随着系统的变大、动态化和复杂性的提高，预测和预防这类情况的能力会下降。敏捷开发的实践中，从不同团队发起的小和更加频繁的更新成为常态，也会导致这类风险的增加。
 风险管理的一种方法是为新版本发起一个小规模且能够全程可监控的部署更新。新旧版本同时并行，减少部署导致下线整个系统可能性。如果小规模部署成功，可以使用一个更大范围的实例更新，保留旧的版本来作为故障切换的节点。如果新版本部署失败，请求可以很容易的导向旧版本实例。如果新版本操作成功，旧版本的实例则可以关闭和回收。
 
-####区域或地区的故障应对
+#### 准备分区(zone)或地区（region）的故障应急预案
+对云资源使用分区管理，保证分区的独立性和隔离性。亚马逊利用地理地区组织其EC2环境，每个地理地区的云包含多个可用的分区。亚马逊云服务的中断历史表明，中断可能影响整个地区或者整个分区。因此，规划设计云的部署环境时，考虑地区或分区的故障弹性是至关重要的。例如，Netflix把所有服务冗余部署进多个地区的云环境，如果一个地区环境发生故障，另一个地区可以接管其服务。当然，这就需要跨地区的数据复制和同步支持。
+
+应用程序在多个可用的分区环境中可以使用主／备或者主/主模式部署。在主／备模式下，一个应用程序被同时部署进IaaS或PaaS提供的两个不同的位置或者可用分区。这两个位置都可以运行该应用的实例，但是在同一时间只有一个位置是活动的。本地负载负载均衡处理本地应用实例，全局的负载均衡通过健康检查决定终端用户的请求发向何处。
+
+在主／主模式下，一个应用程序也是被同时部署进两个位置，但他们都是活动的，同时运行并处理不同的用户，发生故障时会转移服务到彼此。如果一个地区发生故障，全局负载平衡帮助通过剩余的位置重新负载。云资源的主／主模式的优势是提高云资源的利用率，通过多个活动位置提供更能力的选择贴近用户位置的可用服务的能力。
+
+
+#### 尽量减少内部分区／地区的延迟
+如果云环境在地理位置上是分散在长距离或者跨数据中心的分区架构，网络延迟成为考虑一个因素。
+
+对于需要低延迟的服务，应根实际据情况把他们尽量部署在同一地区(region)且尽可能同一分区（zone），在云中部署应用的其中一个挑战是物理架构是不透明的，不同于数据中心可以要求服务部署在相同的物理机架。可以通过谨慎的分析提供一些云内部架构的视角，但要注意，这可能随着时间的变化变的不可控制。
+
+#### 确定高带宽的外部消费者
+考虑数据应该被存储在哪里来减少数据的传输费用。例如，亚马逊把EC2到公共互联网的数据传输做了计费统计。存在这一特性的应用花费将会变多。但是从云的外部定位数据如CDN，可以节省很多的费用。
+
+#### 抽象依赖
+避免创建客户端和服务端的静态依赖。例如，一个应用可能依赖一个存储服务。随着时间的推移存储服务的接口、实现和位置都可能变化。例如，应用程序可能会迁移到有同等服务不同接口、不同地址的不通云提供商。API管理能够通过抽象基础服务和客户端实现之间的访问并暴露一个REST API。这种松耦合方式可以让组件彼此相对独立的发展。
 
 ## 结论
 
+随着技术的迅速发展，开发人员需要不断的提高技能，提炼、采用新技术来架构、设计、开发和支持强大的云应用。要成功的利用云的能力，企业需要做到以下几点：
+* 在培训上投入，确保他们的员工具备构建云应用的能力
+* 找出释放开发人员花在简单、低层次、低价值上的工作时间的方法
+* 提供大规模可伸缩的复杂程序，而且可以通过简单修改就能把它集成进现有的系统中
+
+### 对开发者的建议
+开发人员要利用云的特性，通常采用与分布式系统相关的原则来架构设计应用。这些原则帮助云应用弹性、无缝处理基础设施故障、高效和最优的利用云资源。
+
+本文概述的原则解决了分布式系统的内在挑战。已经在大规模的云应用证明是成功的设计模式被提供给开发人员架构设计他们的应用程序。毫无疑问，随着开发人员学习如何有效的利用云环境，并优雅的处理此环境下特有新的、意料之外的挑战的同时，一种新的设计模式即将诞生。
+
+云应用的成熟度模型位开发人员提供来衡量他们的应用的云成熟度标准方法。这可以用来作为路线图，用于确定云应用发展路程中应该关注哪些内容。
+
+### 云平台需求
+以下要求适用于任何云计算提供商：
+* 支持云计算的行业标准，最好是开放的标准和广泛支持的事实标准。这种支持将不会让你绑死在某一个供应商或专有的API之上，是应用能够在混合云无缝运行的先决条件。
+* 提供与其它云计算平台提供的统一标准的虚拟机镜像。例如，如果是开发一种私有云，且要求与Amazon之间可以一致性的移植应用，考虑创建匹配由Amazon EC2提供的镜像。
+* 支持数据亲和力(使用消费者／生产者的数据调用方式)
+* 使用标准的版本控制脚本来创建自定义的虚拟机配置
+
+我们通过云技术预示着重大的为开发人员和企业促进真正的分布式技术世界的技术转型，技术人员有机会通过采用新的方法和技术，以满足云感知应用开发提供业务转型和实现真正的价值。ODCA希望本文作为云内新应用程序体系结构研究和应用的起点。ODCA相信提升应用开发技能，满足应用不断增长的需求和充分利用云特性，需要继续教育和培训，持续专注于开发技能、进化发展、创新。
+
+
 ## 参考
 
-## 附录
+* “Architectural Patterns for High Availability”
+https://www.infoq.com/presentations/Netflix-Architecture
+* Cloud Architecture Patterns
+https://www.amazon.com/Cloud-Architecture-Patterns-Using-Microsoft-ebook/dp/B009G8PYY4?ie=UTF8&*Version*=1&*entries*=0
+*  “Cloud Characteristics, Principles and Design Patterns”
+http://www.gartner.com/document/2081915
+* “Cloud Design Patterns: Prescriptive Architecture Guidance for Cloud Applications”  
+http://msdn.microsoft.com/en-us/library/dn568099.aspx
+* “Building Cloud-Aware Applications”
+http://www.slideshare.net/cobiacomm/building-cloudaware-applications [slides 17, 18, 19, 31]
+* “Searching for Cloud Architecture...”
+http://blog.cobia.net/cobiacomm/2011/11/25/searching-for-cloud-architecture/
+* “Maximizing Cloud Advantages through Cloud-Aware Applications”
+http://www.intel.com/content/dam/www/public/us/en/documents/white-papers/maximizing-cloud-advantages-through-cloud-aware-applications-paper.pdf   [page 6]
+* Network Latency between U.S. cities (AT&T)
+http://ipnetwork.bgtmo.ip.att.net/pws/network_delay.html
+* “The Fallacies of Distributed Computing Reborn: The Cloud Era – New Relic blog”
+http://blog.newrelic.com/2011/01/06/the-fallacies-of-distributed-computing-reborn-the-cloud-era/
+* “5 Lessons We’ve Learned Using AWS” – Netflix Tech Blog
+http://techblog.netflix.com/2010/12/5-lessons-weve-learned-using-aws.html
+* “Optimizing the Netflix API” – Ben Christensen
+http://benjchristensen.com/2013/04/30/optimizing-the-netflix-api/
+* “Architecting Applications for the Cloud: Best Practices” – Jinesh Varia, Amazon Technical Evangelist
+http://media.amazonwebservices.com/AWS_Cloud_Best_Practices.pdf
+* “Lessons from Distill” – Michael Forhan, AppFirst
+http://www.appfirst.com/blog/lessons-from-distill/
+* “Understanding Security with Patterns” – Prof. Peter Sommerlad, Tutorial T39 @ OOPSLA 2006
+http://wiki.hsr.ch/PeterSommerlad/files/T39-Sommerlad.pdf
+* “How it Works” (Circuit Breaker implementation in Hysterix open source library) – Netflix
+https://github.com/Netflix/Hystrix/wiki/How-it-Works
+* Netflix Shares Cloud Load Balancing and Failover Tool: Eureka! - Netflix Tech Blog
+http://techblog.netflix.com/2012/09/eureka.html
+* “Dystopia as a Service” – Adrian Cockcroft, Netflix
+http://www.slideshare.net/adrianco/dystopia-as-a-service
+* “Netflix and Open Source”
+http://www.eiseverywhere.com/file_uploads/c6b285b64a18cc2742c0fb20061d6530_OBC_BreakoutSession_AdrianCockcroft_1pm.pdf
+
+## 附录A: 术语
+
+|术语|定义|
+|---|---|
+|Agent-Based|是指基于代理的云计算，使用软件代理促进云服务的传递的计算形式，这些代理可以是私有的API或开放的API|
+|Agentless|是指使用标准编程接口（开放API）来发现其中的远程API由云服务或云提供商和云代理之间运行的通信网络的直接分析暴露了云服务。|
+|Application program interface (API)|描述一组构建软件应用程序的工作，协议和工具。一个设计良好的API，可以更容易地提供应用的模块化开发。程序员使用模块来构建应用程序。大多数的工作环境，如Microsoft Windows，提供API让程序员编写与操作环境保持一致的应用程序。|
+|Cloud application|云应用(有时也叫云APP)是一种软件和相关数据托管在云上的应用，有一些原生桌面应用和纯粹的web应用的特性|
+|Cloud consumer|与云供应商从事，无论是云经纪人或通过与云供应商的直接参与的接收云服务的个人或组织。|
+|Data store|数据存储，通指所有的数据存储，包含文件、数据库、文本等等。|
+|Hybrid cloud|云基础设施由2个以上的不同云基础设施构成的单一实体，通过标准化或专有技术使得数据、应用在其之上可以移植(例如，云之间的负载均衡的集中云)。|
+|Infrastructure as a service (IaaS)||
+|Multitenancy||
+|Multi-tier architecture||
+|OAuth||
+|Platform as a service (PaaS)||
+|Private cloud||
+|Public cloud||
+|Representational state transfer (REST)||
+|Software as a service (SaaS)||
+|Solution provider|||
+
+## 附录B: 云分析模式
+## 附录C: 安全访问控制
+## 附录D: 自动伸缩
+## 附录E: CAP 理论
+## 附录F: 数据库分区
+## 附录G: 数据复制
+## 附录H: 静态内容托管
