@@ -1,11 +1,10 @@
 # 云感知应用架构
 
 翻译：**linxuhua:** (hualee215 AT gmail.com)
-
-[TOC]
-
 原文：[architecting_cloud_aware_applications](https://opendatacenteralliance.org/wp-content/uploads/architecting_cloud_aware_applications.pdf)
 
+
+[TOC]
 
 
 ## 应用程序架构演进历程
