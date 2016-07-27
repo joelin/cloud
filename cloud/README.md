@@ -116,6 +116,8 @@ Gartner把PaaS分为两类，一类为应用平台即服务APaaS(Application Pla
 
 ## 三、方案介绍
 
+### 支持成熟度
+
 从以上列出的功能点对三个方案列出表格，看其对PaaS功能的支持成熟度
 
 |方案|应用元数据管理|应用源码版本库/可选|CI支持|CD支持|应用运行环境的打包/可选|应用配置的服务化|服务的发现及自注册|资源的抽象及管理|应用调度/自动部署|应用编排|监控|日志|弹性伸缩策略引擎|
@@ -124,6 +126,28 @@ Gartner把PaaS分为两类，一类为应用平台即服务APaaS(Application Pla
 |swarm|支持|简单支持(可以与自动构建平台对接)|支持|支持|支持|不包含(与应用结合紧密)|支持(Haproxy)|支持|支持|支持compose|监控|可以对接类ELK系统|结合业务指标需定制,很简陋|
 |mesos|支持|不支持|不支持|支持|不支持(采用运行环境容器化，上传应用包方式)|不包含(与应用结合紧密)|支持(Haproxy)|支持|支持|不支持|监控|可以对接类ELK系统|结合业务指标需定制|
 |blumix(ibm/cloudfoundry)|支持|支持(完整链条，支持定制构建流程)|支持|支持|都支持|包含，需要按照其规则使用|支持(Haproxy)|支持|支持|支持，特定方式|监控|集成类ELK系统|结合业务指标需定制|
+
+###　开源产品列表
+
+三个方案都使用开源产品二次开发的，从两个方面来看其开源产品的组成。一、自身架构开源产。二、支持其它服务的对接开源产品。
+
+### 自身架构开源产品
+
+|方案|资源的抽象及管理|分布式系统协调组件|应用编排|应用调度／自动部署|服务的注册发现、软负载|镜像仓库|监控组件|弹性伸缩策略引擎|多主模式自身访问的HA实现|
+|----|---|---|---|-----|---|-----|-----|-----|-----|
+|openshift(redhat/kubernetes)|kubernetes|etcd|kubernetes:pod|kubernetes|kubernetes|registry|cadvisor收集，Heapster汇总|kubernetes|haproxy|
+|swarm|swarm|etcd|compose|swarm|confd+interlock+haproxy|registry|自定义脚本+docker api|厂商开发|haproxy|
+|mesos|mesos|zookeeper|无|marathon|bamboo+zookeeper+haproxy|registry|自定义脚本+docker api|厂商开发|haproxy|
+|blumix(ibm/cloudfoundry)|cloudfoundry|商业|商业|商业|商业|商业|商业|商业|
+
+### 对接外部开源产品
+
+|方案|应用元数据管理|源码版本库|CI支持|CD支持|应用环境的打包|应用配置服务化|应用监控|统一日志|
+|----|---|---|---|-----|---|-----|-----|-----|
+|openshift(redhat/kubernetes)|kubernetes需二次开发|git/gitlab|jenkins|kubernetes需二次开发|docker|360configServer/zk等需自己引入并二次开发对接|(zabbix/nagios/statd+opentsdb+grafana)需要对接开发|ELK(Elastic + Logstash + Kibana)/EFK(Elastic + Fluentd + Kibana)对接需二次开发|
+|swarm|swarm需二次开发|git/gitlab|厂商自研，可对接jenkins,需要二次开发|swarm需二次开发|docker|360configServer/zk等需自己引入并二次开发对接|(zabbix/nagios/statd+opentsdb+grafana)需要对接开发|ELK(Elastic + Logstash + Kibana)/EFK(Elastic + Fluentd + Kibana)需二次开发|
+|mesos|mesos需二次开发|git/gitlab|无,jenkins对接需二次开发|marathon需二次开发|docker|360configServer/zk等需自己引入并二次开发对接|(zabbix/nagios/statd+opentsdb+grafana)需要对接开发|ELK(Elastic + Logstash + Kibana)/EFK(Elastic + Fluentd + Kibana)需二次开发|
+|blumix(ibm/cloudfoundry)|cloudfoundry|商业|商业|商业|商业|商业|商业|商业|
 
 
 ### 产品特性
