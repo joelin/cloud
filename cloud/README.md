@@ -135,10 +135,10 @@ Gartner把PaaS分为两类，一类为应用平台即服务APaaS(Application Pla
 
 |方案|资源的抽象及管理|分布式系统协调组件|应用编排|应用调度／自动部署|服务的注册发现、软负载|镜像仓库|监控组件|弹性伸缩策略引擎|多主模式自身访问的HA实现|
 |----|---|---|---|-----|---|-----|-----|-----|-----|
-|openshift(redhat/kubernetes)|kubernetes|etcd|kubernetes:pod|kubernetes|kubernetes|registry|cadvisor收集，Heapster汇总|kubernetes|haproxy|
+|openshift(redhat/kubernetes)|kubernetes|etcd|kubernetes:pod|kubernetes|kubernetes:service|registry|cadvisor收集，Heapster汇总|kubernetes|haproxy|
 |swarm|swarm|etcd|compose|swarm|confd+interlock+haproxy|registry|自定义脚本+docker api|厂商开发|haproxy|
 |mesos|mesos|zookeeper|无|marathon|bamboo+zookeeper+haproxy|registry|自定义脚本+docker api|厂商开发|haproxy|
-|blumix(ibm/cloudfoundry)|cloudfoundry|商业|商业|商业|商业|商业|商业|商业|
+|blumix(ibm/cloudfoundry)|cloudfoundry|商业|商业|商业|商业|商业|商业|商业|商业|
 
 ### 对接外部开源产品
 
