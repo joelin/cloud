@@ -14,6 +14,7 @@ Gartner把PaaS分为两类，一类为应用平台即服务APaaS(Application Pla
     * 数据存储(多种类型)
     * 应用构建(CI)
     * 应用交付(CD)
+    * 服务模块功能(附加功能，特定的服务[redis等]可以从一个模块快速实例化)
     * 分布式运行环境/部署(部署架构编排)
     * 应用监控/计量
     * 动态伸缩
@@ -83,6 +84,11 @@ Gartner把PaaS分为两类，一类为应用平台即服务APaaS(Application Pla
 
     利用应用元数据能够对应用进行持续的部署交付，可以做到源码、目标码、带运行环境的镜像混合的交付模式，可以实现蓝绿部署、灰度发布等功能。开源：PaaS平台自身支持
 
+* 服务模板
+
+　　企业内部存在一些通用的服务，比如　redis等大部分的配置和环境都一样的，仅有很少需要改动，这时PaaS平台可以提供服务模板的功能让使用者可以快速实例化此类服务。
+　　openshift中有templates(利用kubernetes的POD扩展)服务来实现，swarm也可以使用compose配置模板来实现，mesos则需要自己开发此模块。
+
 * 应用运行环境的打包(可选集成)
 
     带运行环境的产品交付方式，通用采用docker，可以自定义或其它； 开源: docker及仓库 garden等
@@ -133,12 +139,12 @@ Gartner把PaaS分为两类，一类为应用平台即服务APaaS(Application Pla
 
 ### 自身架构开源产品
 
-|方案|资源的抽象及管理|分布式系统协调组件|应用编排|应用调度／自动部署|服务的注册发现、软负载|镜像仓库|监控组件|弹性伸缩策略引擎|多主模式自身访问的HA实现|
-|----|---|---|---|-----|---|-----|-----|-----|-----|
-|openshift(redhat/kubernetes)|kubernetes|etcd|kubernetes:pod|kubernetes|kubernetes:service|registry|cadvisor收集，Heapster汇总|kubernetes|haproxy|
-|swarm|swarm|etcd|compose|swarm|confd+interlock+haproxy|registry|自定义脚本+docker api|厂商开发|haproxy|
-|mesos|mesos|zookeeper|无|marathon|bamboo+zookeeper+haproxy|registry|自定义脚本+docker api|厂商开发|haproxy|
-|blumix(ibm/cloudfoundry)|cloudfoundry|商业|商业|商业|商业|商业|商业|商业|商业|
+|方案|资源的抽象及管理|分布式系统协调组件|应用编排|应用调度／自动部署|服务的注册发现、软负载|镜像仓库|监控组件|弹性伸缩策略引擎|多主模式自身访问的HA实现|服务模板|
+|----|---|---|---|-----|---|-----|-----|-----|-----|-----|
+|openshift(redhat/kubernetes)|kubernetes|etcd|kubernetes:pod|kubernetes|kubernetes:service|registry|cadvisor收集，Heapster汇总|kubernetes|haproxy|kubernetes:pod,templates需二次开发|
+|swarm|swarm|etcd|compose|swarm|confd+interlock+haproxy|registry|自定义脚本+docker api|厂商开发|haproxy|compose需二次开发|
+|mesos|mesos|zookeeper|无|marathon|bamboo+zookeeper+haproxy|registry|自定义脚本+docker api|厂商开发|haproxy|完全自己开发|
+|blumix(ibm/cloudfoundry)|cloudfoundry|商业|商业|商业|商业|商业|商业|商业|商业|商业|
 
 ### 对接外部开源产品
 
